@@ -167,13 +167,11 @@ pokemons = [
     (151, 'Mew'),
 ]
 
-# Insere todos de uma vez
 cursor.executemany('''
     INSERT OR IGNORE INTO primeira_geracao_pokedex (numero, nome)
     VALUES (?, ?)
 ''', pokemons)
 
-# Salva e fecha
 conn.commit()
 conn.close()
 
