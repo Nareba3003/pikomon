@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<title>Adivinhe o Número do Pokémon</title>
+<style>
+  /* Seu CSS aqui */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #5a5a5a, #5a5a5a);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    background: rgb(138, 137, 137);
+    padding: 90px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+  }
+  h1 {
+    color: #000000;
+    margin-bottom: 15px;
+  }
+  #pokemon-nome {
+    font-weight: 700;
+    font-size: 1.5em;
+    color: #000000;
+  }
+  input[type=number] {
+    width: 95%;
+    padding: 12px;
+    margin-top: 15px;
+    font-size: 1.1em;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+  }
+  input[type=number]:focus {
+    border-color: #000000;
+    outline: none;
+  }
+  button {
+    width: 100%;
+    margin-top: 20px;
+    background-color: #3d3d3d;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #504f4f;
+  }
+  #resultado {
+    margin-top: 25px;
+    font-size: 1.2em;
+    font-weight: 600;
+    min-height: 30px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tente descobrir o número deste Pokémon na Pokédex da 1º gen</h1>
+    <br><br>
+    <div>Pokémon: <span id="pokemon-nome">Carregando...</span></div>
+
+    <input type="number" id="chute" placeholder="Digite o número" />
+    <button onclick="verificarChute()">Chutar</button>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    let numeroCorreto = null;
+
+    async function carregarPokemon() {
+      const res = await fetch('/pokemon');
+      const data = await res.json();
+      document.getElementById('pokemon-nome').textContent = data.nome;
+      numeroCorreto = data.numero;
+    }
+
+    async function verificarChute() {
+      const chuteInput = document.getElementById('chute');
+      const resultadoDiv = document.getElementById('resultado');
+      const chute = parseInt(chuteInput.value);
+
+      if (isNaN(chute)) {
+        resultadoDiv.textContent = 'Por favor, digite um número válido!';
+        resultadoDiv.style.color = '#000000';
+        return;
+      }
+
+      const resposta = await fetch('/chutar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chute: chute, numeroCorreto: numeroCorreto })
+      });
+      const resultado = await resposta.json();
+
+      resultadoDiv.textContent = resultado.mensagem;
+      resultadoDiv.style.color = resultado.acertou ? '#000000' : '#000000';
+
+      if(resultado.acertou){
+        chuteInput.disabled = true;
+        document.querySelector('button').disabled = true;
+      }
+    }
+
+    carregarPokemon();
+  </script>
+</body>
+</html>
